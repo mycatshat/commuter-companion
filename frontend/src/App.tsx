@@ -167,22 +167,36 @@ export default function App() {
   return (
     <div className="app">
       <div className="topbar">
-        <div>
-          <h1
-            onClick={() => setScreen("home")}
-            role="button"
-            tabIndex={0}
-            style={{ cursor: "pointer" }}
-          >
-            Commuter Companion
-          </h1>
-          <span className="persona-tag">
-            {screen === "results" && activeTrip
-              ? activeTrip.kind === "rachel-demo"
-                ? "Rachel · Tampines → Raffles Place"
-                : activeTrip.label
-              : "Your saved routes"}
-          </span>
+        <div className="topbar-left">
+          {screen !== "home" && (
+            <button
+              type="button"
+              className="back-button"
+              onClick={() => setScreen("home")}
+              aria-label="Back to home"
+            >
+              <span aria-hidden="true">&larr;</span> Back
+            </button>
+          )}
+          <div>
+            <h1
+              onClick={() => setScreen("home")}
+              role="button"
+              tabIndex={0}
+              style={{ cursor: "pointer" }}
+            >
+              Commuter Companion
+            </h1>
+            <span className="persona-tag">
+              {screen === "results" && activeTrip
+                ? activeTrip.kind === "rachel-demo"
+                  ? "Rachel · Tampines → Raffles Place"
+                  : activeTrip.label
+                : screen === "planning"
+                ? "Plan a new trip"
+                : "Your saved routes"}
+            </span>
+          </div>
         </div>
         <ScenarioPicker value={scenario} onChange={setScenario} />
       </div>
