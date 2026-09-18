@@ -13,6 +13,8 @@ import httpx
 from .. import config
 from .. import mock_data
 
+_DEFAULT_ALERTS = {"Status": 1, "AffectedSegments": [], "Message": []}
+
 
 def _headers() -> dict:
     return {"AccountKey": config.LTA_ACCOUNT_KEY, "accept": "application/json"}
@@ -29,14 +31,17 @@ async def _get(path: str, params: dict | None = None) -> dict:
 async def get_train_service_alerts(scenario: str) -> dict:
     if config.USE_MOCK:
         return mock_data.train_service_alerts(scenario)
-    # The real endpoint wraps its single result in an OData "value" list
-    # (e.g. {"value": [{"Status": 1, ...}]}), unlike the flat shape the
-    # rest of the app works with (which mirrors the *contents* of that one
-    # element). Unwrap here so route_planner/advice_engine never need to
-    # know which mode is active.
+    # The real endpoint's "value" field has been observed as either a
+    # single-item list or a bare object depending on the exact response --
+    # handle both so route_planner/advice_engine always get the flat shape
+    # they expect (mirroring mock_data.train_service_alerts).
     data = await _get("TrainServiceAlerts")
-    value = data.get("value") or []
-    return value[0] if value else {"Status": 1, "AffectedSegments": [], "Message": []}
+    value = data.get("value")
+    if isinstance(value, list):
+        return value[0] if value else _DEFAULT_ALERTS
+    if isinstance(value, dict):
+        return value
+    return _DEFAULT_ALERTS
 
 
 async def get_pcd_realtime(train_line: str, scenario: str) -> dict:
