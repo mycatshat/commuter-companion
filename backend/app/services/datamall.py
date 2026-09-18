@@ -29,7 +29,14 @@ async def _get(path: str, params: dict | None = None) -> dict:
 async def get_train_service_alerts(scenario: str) -> dict:
     if config.USE_MOCK:
         return mock_data.train_service_alerts(scenario)
-    return await _get("TrainServiceAlerts")
+    # The real endpoint wraps its single result in an OData "value" list
+    # (e.g. {"value": [{"Status": 1, ...}]}), unlike the flat shape the
+    # rest of the app works with (which mirrors the *contents* of that one
+    # element). Unwrap here so route_planner/advice_engine never need to
+    # know which mode is active.
+    data = await _get("TrainServiceAlerts")
+    value = data.get("value") or []
+    return value[0] if value else {"Status": 1, "AffectedSegments": [], "Message": []}
 
 
 async def get_pcd_realtime(train_line: str, scenario: str) -> dict:
