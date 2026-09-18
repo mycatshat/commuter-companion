@@ -3,12 +3,16 @@ import StationInput from "./StationInput";
 
 interface Props {
   onPlan: (origin: string, destination: string) => void;
-  onCancel: () => void;
+  // No longer rendered here -- the topbar's own Back button (always visible
+  // off the home screen) is now the single, consistent way back, so this
+  // screen doesn't need a second one. Kept in the props type/call sites in
+  // case a future screen-specific cancel action is needed again.
+  onCancel?: () => void;
   initialOrigin?: string;
   initialDestination?: string;
 }
 
-export default function TripPlanner({ onPlan, onCancel, initialOrigin, initialDestination }: Props) {
+export default function TripPlanner({ onPlan, initialOrigin, initialDestination }: Props) {
   const [origin, setOrigin] = useState(initialOrigin ?? "");
   const [destination, setDestination] = useState(initialDestination ?? "");
 
@@ -17,9 +21,6 @@ export default function TripPlanner({ onPlan, onCancel, initialOrigin, initialDe
   return (
     <div className="trip-planner">
       <div className="trip-planner-header">
-        <button className="text-button" onClick={onCancel} aria-label="Back">
-          {"←"} Back
-        </button>
         <h2>Plan a trip</h2>
       </div>
 
